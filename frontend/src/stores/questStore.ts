@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { Quest, QuestGenerationParams, QuestTemplate, QuestType } from '../types';
-import { QuestGenerator } from '../utils/questGenerator';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { Quest, QuestGenerationParams, QuestTemplate } from "../types";
+import { QuestGenerator } from "../utils/questGenerator";
 
 interface QuestState {
   generatedQuests: Quest[];
@@ -17,7 +17,10 @@ interface QuestState {
 interface QuestActions {
   // Quest Generation
   generateQuest: (params?: QuestGenerationParams) => void;
-  generateMultipleQuests: (count: number, params?: QuestGenerationParams) => void;
+  generateMultipleQuests: (
+    count: number,
+    params?: QuestGenerationParams,
+  ) => void;
   setGenerationParams: (params: QuestGenerationParams) => void;
   clearGeneratedQuests: () => void;
 
@@ -33,7 +36,11 @@ interface QuestActions {
   isFavorite: (questId: string) => boolean;
 
   // Templates
-  saveAsTemplate: (quest: Quest, templateName: string, description: string) => void;
+  saveAsTemplate: (
+    quest: Quest,
+    templateName: string,
+    description: string,
+  ) => void;
   deleteTemplate: (templateId: string) => void;
   generateFromTemplate: (template: QuestTemplate) => void;
 
@@ -64,10 +71,10 @@ export const useQuestStore = create<QuestStore>()(
       favorites: [],
       templates: [],
       generationParams: {
-        questType: 'random',
-        difficulty: 'random',
-        length: 'random',
-        alignment: 'Any',
+        questType: "random",
+        difficulty: "random",
+        length: "random",
+        alignment: "Any",
         includeComplications: true,
         includeSecondaryObjectives: true,
       },
@@ -76,11 +83,11 @@ export const useQuestStore = create<QuestStore>()(
       // Quest Generation
       generateQuest: (params) => {
         set({ isGenerating: true });
-        
+
         try {
           const finalParams = { ...get().generationParams, ...params };
           const quest = questGenerator.generateQuest(finalParams);
-          
+
           set((state) => ({
             generatedQuests: [quest],
             currentQuest: quest,
@@ -88,18 +95,21 @@ export const useQuestStore = create<QuestStore>()(
             isGenerating: false,
           }));
         } catch (error) {
-          console.error('Failed to generate quest:', error);
+          console.error("Failed to generate quest:", error);
           set({ isGenerating: false });
         }
       },
 
       generateMultipleQuests: (count, params) => {
         set({ isGenerating: true });
-        
+
         try {
           const finalParams = { ...get().generationParams, ...params };
-          const quests = questGenerator.generateMultipleQuests(count, finalParams);
-          
+          const quests = questGenerator.generateMultipleQuests(
+            count,
+            finalParams,
+          );
+
           set((state) => ({
             generatedQuests: quests,
             currentQuest: quests[0] || null,
@@ -107,7 +117,7 @@ export const useQuestStore = create<QuestStore>()(
             isGenerating: false,
           }));
         } catch (error) {
-          console.error('Failed to generate quests:', error);
+          console.error("Failed to generate quests:", error);
           set({ isGenerating: false });
         }
       },
@@ -128,7 +138,9 @@ export const useQuestStore = create<QuestStore>()(
 
       saveQuest: (quest) =>
         set((state) => {
-          const existingIndex = state.savedQuests.findIndex(q => q.id === quest.id);
+          const existingIndex = state.savedQuests.findIndex(
+            (q) => q.id === quest.id,
+          );
           if (existingIndex >= 0) {
             // Update existing quest
             const updatedQuests = [...state.savedQuests];
@@ -142,9 +154,10 @@ export const useQuestStore = create<QuestStore>()(
 
       deleteQuest: (questId) =>
         set((state) => ({
-          savedQuests: state.savedQuests.filter(q => q.id !== questId),
-          favorites: state.favorites.filter(id => id !== questId),
-          currentQuest: state.currentQuest?.id === questId ? null : state.currentQuest,
+          savedQuests: state.savedQuests.filter((q) => q.id !== questId),
+          favorites: state.favorites.filter((id) => id !== questId),
+          currentQuest:
+            state.currentQuest?.id === questId ? null : state.currentQuest,
         })),
 
       duplicateQuest: (quest) => {
@@ -154,7 +167,7 @@ export const useQuestStore = create<QuestStore>()(
           title: `${quest.title} (Copy)`,
           createdAt: new Date(),
         };
-        
+
         set((state) => ({
           savedQuests: [...state.savedQuests, duplicatedQuest],
           currentQuest: duplicatedQuest,
@@ -164,14 +177,14 @@ export const useQuestStore = create<QuestStore>()(
       // Favorites
       addToFavorites: (questId) =>
         set((state) => ({
-          favorites: state.favorites.includes(questId) 
-            ? state.favorites 
+          favorites: state.favorites.includes(questId)
+            ? state.favorites
             : [...state.favorites, questId],
         })),
 
       removeFromFavorites: (questId) =>
         set((state) => ({
-          favorites: state.favorites.filter(id => id !== questId),
+          favorites: state.favorites.filter((id) => id !== questId),
         })),
 
       isFavorite: (questId) => get().favorites.includes(questId),
@@ -201,12 +214,12 @@ export const useQuestStore = create<QuestStore>()(
 
       deleteTemplate: (templateId) =>
         set((state) => ({
-          templates: state.templates.filter(t => t.id !== templateId),
+          templates: state.templates.filter((t) => t.id !== templateId),
         })),
 
       generateFromTemplate: (template) => {
         set({ isGenerating: true });
-        
+
         try {
           // Generate quest with template constraints
           const quest = questGenerator.generateQuest({
@@ -214,7 +227,8 @@ export const useQuestStore = create<QuestStore>()(
             difficulty: template.template.difficulty,
             length: template.template.length,
             includeComplications: get().generationParams.includeComplications,
-            includeSecondaryObjectives: get().generationParams.includeSecondaryObjectives,
+            includeSecondaryObjectives:
+              get().generationParams.includeSecondaryObjectives,
           });
 
           set((state) => ({
@@ -224,7 +238,7 @@ export const useQuestStore = create<QuestStore>()(
             isGenerating: false,
           }));
         } catch (error) {
-          console.error('Failed to generate quest from template:', error);
+          console.error("Failed to generate quest from template:", error);
           set({ isGenerating: false });
         }
       },
@@ -234,9 +248,11 @@ export const useQuestStore = create<QuestStore>()(
 
       getQuestById: (questId) => {
         const state = get();
-        return state.savedQuests.find(q => q.id === questId) ||
-               state.questHistory.find(q => q.id === questId) ||
-               state.generatedQuests.find(q => q.id === questId);
+        return (
+          state.savedQuests.find((q) => q.id === questId) ||
+          state.questHistory.find((q) => q.id === questId) ||
+          state.generatedQuests.find((q) => q.id === questId)
+        );
       },
 
       // Export/Import
@@ -244,7 +260,7 @@ export const useQuestStore = create<QuestStore>()(
         const exportData = {
           quests,
           exportedAt: new Date().toISOString(),
-          version: '1.0',
+          version: "1.0",
         };
         return JSON.stringify(exportData, null, 2);
       },
@@ -257,14 +273,15 @@ export const useQuestStore = create<QuestStore>()(
           set((state) => ({
             savedQuests: [
               ...state.savedQuests,
-              ...importedQuests.filter((q: Quest) => 
-                !state.savedQuests.some(existing => existing.id === q.id)
+              ...importedQuests.filter(
+                (q: Quest) =>
+                  !state.savedQuests.some((existing) => existing.id === q.id),
               ),
             ],
           }));
         } catch (error) {
-          console.error('Failed to import quests:', error);
-          throw new Error('Invalid quest data format');
+          console.error("Failed to import quests:", error);
+          throw new Error("Invalid quest data format");
         }
       },
 
@@ -280,7 +297,7 @@ export const useQuestStore = create<QuestStore>()(
         }),
     }),
     {
-      name: 'quest-generator-storage',
+      name: "quest-generator-storage",
       partialize: (state) => ({
         savedQuests: state.savedQuests,
         questHistory: state.questHistory,
@@ -288,6 +305,6 @@ export const useQuestStore = create<QuestStore>()(
         templates: state.templates,
         generationParams: state.generationParams,
       }),
-    }
-  )
+    },
+  ),
 );

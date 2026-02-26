@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
-import type { Quest, QuestType, Difficulty } from '../types';
-import { useQuestStore } from '../stores/questStore';
+import React, { useState, useMemo } from "react";
+import type { Quest, QuestType, Difficulty } from "../types";
+import { useQuestStore } from "../stores/questStore";
 
 export const QuestLibrary: React.FC = () => {
   const {
@@ -13,68 +13,86 @@ export const QuestLibrary: React.FC = () => {
     importQuests,
   } = useQuestStore();
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<QuestType | 'all'>('all');
-  const [filterDifficulty, setFilterDifficulty] = useState<Difficulty | 'all'>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState<QuestType | "all">("all");
+  const [filterDifficulty, setFilterDifficulty] = useState<Difficulty | "all">(
+    "all",
+  );
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
-  const [sortBy, setSortBy] = useState<'date' | 'title' | 'difficulty'>('date');
+  const [sortBy, setSortBy] = useState<"date" | "title" | "difficulty">("date");
 
   const filteredQuests = useMemo(() => {
     let filtered = [...savedQuests];
 
     // Filter by search term
     if (searchTerm) {
-      filtered = filtered.filter(quest =>
-        quest.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        quest.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        quest.primaryObjective.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (quest) =>
+          quest.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          quest.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          quest.primaryObjective
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()),
       );
     }
 
     // Filter by type
-    if (filterType !== 'all') {
-      filtered = filtered.filter(quest => quest.type === filterType);
+    if (filterType !== "all") {
+      filtered = filtered.filter((quest) => quest.type === filterType);
     }
 
     // Filter by difficulty
-    if (filterDifficulty !== 'all') {
-      filtered = filtered.filter(quest => quest.difficulty === filterDifficulty);
+    if (filterDifficulty !== "all") {
+      filtered = filtered.filter(
+        (quest) => quest.difficulty === filterDifficulty,
+      );
     }
 
     // Filter by favorites
     if (showFavoritesOnly) {
-      filtered = filtered.filter(quest => favorites.includes(quest.id));
+      filtered = filtered.filter((quest) => favorites.includes(quest.id));
     }
 
     // Sort
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case 'title':
+        case "title":
           return a.title.localeCompare(b.title);
-        case 'difficulty':
+        case "difficulty": {
           const difficultyOrder = { Easy: 1, Medium: 2, Hard: 3, Epic: 4 };
           return difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty];
-        case 'date':
+        }
+        case "date":
         default:
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
       }
     });
 
     return filtered;
-  }, [savedQuests, searchTerm, filterType, filterDifficulty, showFavoritesOnly, sortBy, favorites]);
+  }, [
+    savedQuests,
+    searchTerm,
+    filterType,
+    filterDifficulty,
+    showFavoritesOnly,
+    sortBy,
+    favorites,
+  ]);
 
   const handleExport = () => {
-    const questsToExport = showFavoritesOnly 
-      ? savedQuests.filter(q => favorites.includes(q.id))
+    const questsToExport = showFavoritesOnly
+      ? savedQuests.filter((q) => favorites.includes(q.id))
       : savedQuests;
-      
+
     const exportData = exportQuests(questsToExport);
-    const blob = new Blob([exportData], { type: 'application/json' });
+    const blob = new Blob([exportData], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
+
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `quests-export-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `quests-export-${new Date().toISOString().split("T")[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -91,7 +109,7 @@ export const QuestLibrary: React.FC = () => {
           importQuests(content);
           // Could add success toast here
         } catch (error) {
-          console.error('Import failed:', error);
+          console.error("Import failed:", error);
           // Could add error toast here
         }
       };
@@ -99,8 +117,8 @@ export const QuestLibrary: React.FC = () => {
     }
   };
 
-  const uniqueTypes = [...new Set(savedQuests.map(q => q.type))];
-  const uniqueDifficulties = [...new Set(savedQuests.map(q => q.difficulty))];
+  const uniqueTypes = [...new Set(savedQuests.map((q) => q.type))];
+  const uniqueDifficulties = [...new Set(savedQuests.map((q) => q.difficulty))];
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -129,12 +147,16 @@ export const QuestLibrary: React.FC = () => {
           <div>
             <select
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value as QuestType | 'all')}
+              onChange={(e) =>
+                setFilterType(e.target.value as QuestType | "all")
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="all">All Types</option>
-              {uniqueTypes.map(type => (
-                <option key={type} value={type}>{type}</option>
+              {uniqueTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
               ))}
             </select>
           </div>
@@ -143,12 +165,16 @@ export const QuestLibrary: React.FC = () => {
           <div>
             <select
               value={filterDifficulty}
-              onChange={(e) => setFilterDifficulty(e.target.value as Difficulty | 'all')}
+              onChange={(e) =>
+                setFilterDifficulty(e.target.value as Difficulty | "all")
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="all">All Difficulties</option>
-              {uniqueDifficulties.map(difficulty => (
-                <option key={difficulty} value={difficulty}>{difficulty}</option>
+              {uniqueDifficulties.map((difficulty) => (
+                <option key={difficulty} value={difficulty}>
+                  {difficulty}
+                </option>
               ))}
             </select>
           </div>
@@ -157,7 +183,9 @@ export const QuestLibrary: React.FC = () => {
           <div>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'date' | 'title' | 'difficulty')}
+              onChange={(e) =>
+                setSortBy(e.target.value as "date" | "title" | "difficulty")
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="date">Sort by Date</option>
@@ -204,17 +232,28 @@ export const QuestLibrary: React.FC = () => {
       {/* Quest Grid */}
       {filteredQuests.length === 0 ? (
         <div className="text-center py-12">
-          <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <svg
+            className="w-16 h-16 text-gray-400 mx-auto mb-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
           </svg>
           <p className="text-gray-600 text-lg mb-2">
-            {savedQuests.length === 0 ? 'No saved quests yet' : 'No quests match your filters'}
+            {savedQuests.length === 0
+              ? "No saved quests yet"
+              : "No quests match your filters"}
           </p>
           <p className="text-gray-500">
-            {savedQuests.length === 0 
-              ? 'Generate some quests and save them to build your library!'
-              : 'Try adjusting your search or filter criteria'
-            }
+            {savedQuests.length === 0
+              ? "Generate some quests and save them to build your library!"
+              : "Try adjusting your search or filter criteria"}
           </p>
         </div>
       ) : (
@@ -243,32 +282,59 @@ interface QuestCardProps {
   onDuplicate: () => void;
 }
 
-const QuestCard: React.FC<QuestCardProps> = ({ quest, isFavorite, onView, onDelete, onDuplicate }) => {
+const QuestCard: React.FC<QuestCardProps> = ({
+  quest,
+  isFavorite,
+  onView,
+  onDelete,
+  onDuplicate,
+}) => {
   return (
     <div className="bg-white rounded-lg shadow-lg p-4 hover:shadow-xl transition-shadow">
       <div className="flex justify-between items-start mb-2">
-        <h3 className="text-lg font-semibold text-gray-800 line-clamp-2 flex-1">{quest.title}</h3>
+        <h3 className="text-lg font-semibold text-gray-800 line-clamp-2 flex-1">
+          {quest.title}
+        </h3>
         {isFavorite && (
-          <svg className="w-5 h-5 text-red-500 ml-2" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+          <svg
+            className="w-5 h-5 text-red-500 ml-2"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fillRule="evenodd"
+              d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+              clipRule="evenodd"
+            />
           </svg>
         )}
       </div>
 
       <div className="flex flex-wrap gap-1 mb-3">
-        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">{quest.type}</span>
-        <span className={`px-2 py-1 rounded text-xs ${
-          quest.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
-          quest.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-          quest.difficulty === 'Hard' ? 'bg-orange-100 text-orange-800' :
-          'bg-red-100 text-red-800'
-        }`}>
+        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+          {quest.type}
+        </span>
+        <span
+          className={`px-2 py-1 rounded text-xs ${
+            quest.difficulty === "Easy"
+              ? "bg-green-100 text-green-800"
+              : quest.difficulty === "Medium"
+                ? "bg-yellow-100 text-yellow-800"
+                : quest.difficulty === "Hard"
+                  ? "bg-orange-100 text-orange-800"
+                  : "bg-red-100 text-red-800"
+          }`}
+        >
           {quest.difficulty}
         </span>
-        <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">{quest.length}</span>
+        <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
+          {quest.length}
+        </span>
       </div>
 
-      <p className="text-gray-600 text-sm mb-4 line-clamp-3">{quest.description}</p>
+      <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+        {quest.description}
+      </p>
 
       <div className="flex justify-between items-center">
         <span className="text-xs text-gray-500">

@@ -1,6 +1,6 @@
-import { useCallback } from 'react';
-import { useQuestStore } from '../stores/questStore';
-import type { QuestGenerationParams } from '../types';
+import { useCallback } from "react";
+import { useQuestStore } from "../stores/questStore";
+import type { QuestGenerationParams } from "../types";
 
 export const useQuestGeneration = () => {
   const {
@@ -13,26 +13,35 @@ export const useQuestGeneration = () => {
 
   const generateRandomQuest = useCallback(() => {
     generateQuest({
-      questType: 'random',
-      difficulty: 'random',
-      length: 'random',
+      questType: "random",
+      difficulty: "random",
+      length: "random",
       includeComplications: true,
       includeSecondaryObjectives: true,
     });
   }, [generateQuest]);
 
-  const generateQuestWithParams = useCallback((params: QuestGenerationParams) => {
-    generateQuest(params);
-  }, [generateQuest]);
+  const generateQuestWithParams = useCallback(
+    (params: QuestGenerationParams) => {
+      generateQuest(params);
+    },
+    [generateQuest],
+  );
 
-  const generateBatch = useCallback((count: number, params?: QuestGenerationParams) => {
-    const finalParams = params || generationParams;
-    generateMultipleQuests(count, finalParams);
-  }, [generateMultipleQuests, generationParams]);
+  const generateBatch = useCallback(
+    (count: number, params?: QuestGenerationParams) => {
+      const finalParams = params || generationParams;
+      generateMultipleQuests(count, finalParams);
+    },
+    [generateMultipleQuests, generationParams],
+  );
 
-  const updateParams = useCallback((params: Partial<QuestGenerationParams>) => {
-    setGenerationParams({ ...generationParams, ...params });
-  }, [generationParams, setGenerationParams]);
+  const updateParams = useCallback(
+    (params: Partial<QuestGenerationParams>) => {
+      setGenerationParams({ ...generationParams, ...params });
+    },
+    [generationParams, setGenerationParams],
+  );
 
   return {
     generateRandomQuest,
